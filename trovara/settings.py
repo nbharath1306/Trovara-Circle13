@@ -22,7 +22,6 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "corsheaders",
-    "django_celery_results",
     # Our app
     "agent",
 ]
@@ -87,12 +86,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Celery
-CELERY_BROKER_URL = os.getenv("REDIS_URL")
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True

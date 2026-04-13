@@ -1,12 +1,15 @@
-from celery import shared_task
+from django.db import connection
 from .models import ResearchTask
 from .services.search import search_web
 from .services.scraper import fetch_page_text
 from .services.llm import summarize_source, generate_report
 
 
-@shared_task
 def run_trovara(task_id: int):
+    """
+    Run the 4-step research pipeline for a given ResearchTask.
+    Designed to be invoked in a background thread from the view.
+    """
     try:
         task = ResearchTask.objects.get(id=task_id)
 
@@ -51,6 +54,12 @@ def run_trovara(task_id: int):
         task.save(update_fields=["report", "status", "updated_at"])
 
     except Exception as e:
-        task.status = "failed"
-        task.error = str(e)
-        task.save(update_fields=["status", "error", "updated_at"])
+        try:
+            task.status = "failed"
+            task.error = str(e)
+            task.save(update_fields=["status", "error", "updated_at"])
+        except Exception:
+            pass
+    finally:
+        # Release this thread's DB connection back to the pool
+        connection.close()

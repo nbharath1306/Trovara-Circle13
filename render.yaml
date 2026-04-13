@@ -16,27 +16,5 @@ services:
         value: trovara-web.onrender.com
       - key: DATABASE_URL
         sync: false
-      - key: REDIS_URL
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
-
-  - type: worker
-    name: trovara-worker
-    runtime: python
-    plan: free
-    region: singapore
-    branch: main
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "celery -A trovara worker --loglevel=info"
-    envVars:
-      - key: DJANGO_SECRET_KEY
-        sync: false
-      - key: DEBUG
-        value: "False"
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
       - key: GROQ_API_KEY
         sync: false

@@ -1,3 +1,5 @@
+import threading
+
 from rest_framework import generics
 from .models import ResearchTask
 from .serializers import ResearchTaskListSerializer, ResearchTaskDetailSerializer
@@ -14,7 +16,10 @@ class ResearchTaskListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         task = serializer.save()
-        run_trovara.delay(task.id)
+        # Run the agent in a background daemon thread so the HTTP response
+        # returns immediately. The frontend polls the detail endpoint for status.
+        thread = threading.Thread(target=run_trovara, args=(task.id,), daemon=True)
+        thread.start()
 
 
 class ResearchTaskDetailView(generics.RetrieveDestroyAPIView):
