@@ -1,0 +1,420 @@
+# Frontend — index.html
+
+## Overview
+
+A single HTML page served by Django. No React, no Vue — just HTML, CSS, and vanilla JavaScript. It calls the DRF API using `fetch()` and polls for status updates every 3 seconds.
+
+## What the Frontend Does
+
+1. User types a topic and clicks "Research"
+2. JavaScript POSTs to `/api/research/`
+3. Gets back a task `id`
+4. Polls `GET /api/research/<id>/` every 3 seconds
+5. Shows live status updates (Searching... Reading... Summarizing...)
+6. When `status === "done"`, renders the markdown report
+7. Shows error message if `status === "failed"`
+
+---
+
+## Full Template
+
+```html
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trovara</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: white;
+      padding: 1.5rem 2rem;
+    }
+
+    header h1 { font-size: 1.4rem; font-weight: 600; }
+    header p  { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
+
+    .container {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .search-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-row input:focus { border-color: #4f46e5; }
+
+    .input-row button {
+      padding: 12px 24px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .input-row button:hover    { background: #4338ca; }
+    .input-row button:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+    .status-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .status-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-text {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #4f46e5;
+    }
+
+    .status-text.done   { color: #059669; }
+    .status-text.failed { color: #dc2626; }
+
+    .steps {
+      display: flex;
+      gap: 8px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: #f3f4f6;
+      color: #9ca3af;
+    }
+
+    .step.active    { background: #ede9fe; color: #4f46e5; }
+    .step.completed { background: #d1fae5; color: #059669; }
+
+    .report-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .report-card h2 {
+      font-size: 1rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .report-content {
+      line-height: 1.75;
+      color: #374151;
+    }
+
+    .report-content h1,
+    .report-content h2,
+    .report-content h3 {
+      margin: 1.25rem 0 0.5rem;
+      color: #111827;
+    }
+
+    .report-content p  { margin-bottom: 1rem; }
+    .report-content ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+    .report-content li { margin-bottom: 0.3rem; }
+
+    .history-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .history-card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+    .history-item:hover .history-topic { color: #4f46e5; }
+
+    .history-topic  { font-size: 0.95rem; }
+    .history-status {
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+
+    .status-done      { background: #d1fae5; color: #059669; }
+    .status-failed    { background: #fee2e2; color: #dc2626; }
+    .status-pending,
+    .status-searching,
+    .status-reading,
+    .status-summarizing,
+    .status-generating { background: #ede9fe; color: #4f46e5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Trovara</h1>
+  <p>AI agent that searches the web, reads sources, and generates a research report</p>
+</header>
+
+<div class="container">
+
+  <!-- Search Input -->
+  <div class="search-card">
+    <div class="input-row">
+      <input type="text" id="topic-input" placeholder="Enter a research topic e.g. quantum computing basics" />
+      <button id="search-btn" onclick="startResearch()">Research</button>
+    </div>
+  </div>
+
+  <!-- Live Status -->
+  <div class="status-card" id="status-card">
+    <div class="status-label">Agent Status</div>
+    <div class="status-text" id="status-text">Starting...</div>
+    <div class="steps">
+      <div class="step" id="step-searching">Searching web</div>
+      <div class="step" id="step-reading">Reading sources</div>
+      <div class="step" id="step-summarizing">Summarizing</div>
+      <div class="step" id="step-generating">Generating report</div>
+    </div>
+  </div>
+
+  <!-- Report Output -->
+  <div class="report-card" id="report-card">
+    <h2>Generated Research Report</h2>
+    <div class="report-content" id="report-content"></div>
+  </div>
+
+  <!-- History -->
+  <div class="history-card" id="history-card">
+    <h2>Previous Research Tasks</h2>
+    <div id="history-list"></div>
+  </div>
+
+</div>
+
+<script>
+  const API = "/api/research/";
+  let pollInterval = null;
+
+  // Load history on page load
+  window.onload = loadHistory;
+
+  async function startResearch() {
+    const topic = document.getElementById("topic-input").value.trim();
+    if (!topic) return;
+
+    const btn = document.getElementById("search-btn");
+    btn.disabled = true;
+    btn.textContent = "Working...";
+
+    // Reset UI
+    hideReport();
+    showStatus("Submitting topic...");
+
+    try {
+      const res  = await fetch(API, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ topic }),
+      });
+      const data = await res.json();
+      pollTask(data.id);
+    } catch (err) {
+      showStatus("Error submitting topic. Try again.", "failed");
+      btn.disabled = false;
+      btn.textContent = "Research";
+    }
+  }
+
+  function pollTask(taskId) {
+    clearInterval(pollInterval);
+    pollInterval = setInterval(async () => {
+      const res  = await fetch(`${API}${taskId}/`);
+      const data = await res.json();
+      updateStatus(data);
+
+      if (data.status === "done" || data.status === "failed") {
+        clearInterval(pollInterval);
+        document.getElementById("search-btn").disabled = false;
+        document.getElementById("search-btn").textContent = "Research";
+        loadHistory();
+      }
+    }, 3000);
+  }
+
+  function updateStatus(data) {
+    const stepMap = {
+      searching:   "step-searching",
+      reading:     "step-reading",
+      summarizing: "step-summarizing",
+      generating:  "step-generating",
+    };
+    const labelMap = {
+      pending:     "Waiting to start...",
+      searching:   "Searching the web...",
+      reading:     "Reading sources...",
+      summarizing: "Summarizing content...",
+      generating:  "Generating report...",
+      done:        "Report complete!",
+      failed:      "Failed: " + (data.error || "Unknown error"),
+    };
+
+    showStatus(labelMap[data.status] || data.status, data.status);
+
+    // Update step pills
+    const order = ["searching", "reading", "summarizing", "generating"];
+    const currentIdx = order.indexOf(data.status);
+    order.forEach((step, idx) => {
+      const el = document.getElementById("step-" + step);
+      if (!el) return;
+      if (idx < currentIdx || data.status === "done") {
+        el.className = "step completed";
+      } else if (idx === currentIdx) {
+        el.className = "step active";
+      } else {
+        el.className = "step";
+      }
+    });
+
+    if (data.status === "done" && data.report) {
+      showReport(data.report);
+    }
+  }
+
+  function showStatus(msg, cls) {
+    const card = document.getElementById("status-card");
+    const text = document.getElementById("status-text");
+    card.style.display = "block";
+    text.textContent   = msg;
+    text.className     = "status-text " + (cls || "");
+  }
+
+  function showReport(markdown) {
+    const card    = document.getElementById("report-card");
+    const content = document.getElementById("report-content");
+    card.style.display = "block";
+    // Simple markdown to HTML (headings, paragraphs, lists)
+    content.innerHTML = markdownToHTML(markdown);
+  }
+
+  function hideReport() {
+    document.getElementById("report-card").style.display = "none";
+    document.getElementById("status-card").style.display = "none";
+  }
+
+  function markdownToHTML(md) {
+    return md
+      .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+      .replace(/^## (.+)$/gm,  "<h2>$1</h2>")
+      .replace(/^# (.+)$/gm,   "<h1>$1</h1>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g,    "<em>$1</em>")
+      .replace(/^- (.+)$/gm,   "<li>$1</li>")
+      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+      .replace(/\n\n/g, "</p><p>")
+      .replace(/^(?!<[hul])(.+)$/gm, "<p>$1</p>");
+  }
+
+  async function loadHistory() {
+    const res  = await fetch(API);
+    const data = await res.json();
+    const list = document.getElementById("history-list");
+    if (!data.length) {
+      list.innerHTML = "<p style='color:#9ca3af;font-size:0.9rem'>No research tasks yet.</p>";
+      return;
+    }
+    list.innerHTML = data.map(task => `
+      <div class="history-item" onclick="loadTask(${task.id})">
+        <span class="history-topic">${task.topic}</span>
+        <span class="history-status status-${task.status}">${task.status}</span>
+      </div>
+    `).join("");
+  }
+
+  async function loadTask(taskId) {
+    const res  = await fetch(`${API}${taskId}/`);
+    const data = await res.json();
+    updateStatus(data);
+    if (data.status === "done" && data.report) showReport(data.report);
+  }
+</script>
+
+</body>
+</html>
+```
+
+## Key Frontend Behaviors
+
+| Behavior | Implementation |
+|---|---|
+| Submit topic | `fetch POST /api/research/` |
+| Poll status every 3s | `setInterval` with `fetch GET /api/research/<id>/` |
+| Live step indicators | CSS class changes on step pill elements |
+| Render markdown report | Simple regex-based markdown parser |
+| Load task history | `fetch GET /api/research/` on page load |
+| Click history item | Re-loads that task's result |
