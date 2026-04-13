@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trovara — AI Research Agent</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>"/>
+  <title>Trovara — AI Research Agent by Circle13</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b5cf6'/><stop offset='0.5' stop-color='%236366f1'/><stop offset='1' stop-color='%23ec4899'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text x='50' y='72' font-family='Georgia,serif' font-size='62' font-weight='700' text-anchor='middle' fill='white' font-style='italic'>T</text></svg>"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -123,8 +123,18 @@
       z-index: -1;
     }
 
-    .brand-text { font-weight: 700; }
-    .brand-sub  { font-weight: 400; color: var(--text-3); margin-left: 4px; }
+    .brand-stack {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .brand-text { font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em; }
+    .brand-sub  {
+      font-weight: 500;
+      color: var(--text-3);
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+    }
 
     .nav-actions {
       display: flex;
@@ -896,9 +906,15 @@
 <header>
   <div class="nav">
     <div class="brand">
-      <div class="brand-mark">✦</div>
-      <span class="brand-text">Trovara</span>
-      <span class="brand-sub">research agent</span>
+      <div class="brand-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="brand-stack">
+        <span class="brand-text">Trovara</span>
+        <span class="brand-sub">by Circle13</span>
+      </div>
     </div>
     <div class="nav-actions">
       <span class="badge-live">Online</span>
@@ -1025,7 +1041,7 @@
 </main>
 
 <footer>
-  <p>Built with Django, Groq, and DuckDuckGo. Open source on <a href="https://github.com/nbharath1306/Trovara-Circle13" target="_blank" rel="noopener">GitHub</a>.</p>
+  <p>Trovara is a <a href="https://github.com/nbharath1306/Trovara-Circle13" target="_blank" rel="noopener">Circle13</a> product. Built with Django, Groq, and DuckDuckGo.</p>
 </footer>
 
 <div class="toast" id="toast"></div>
