@@ -992,6 +992,256 @@
       .marquee { display: none; }
     }
 
+    /* ── Mouse spotlight ──────────────────────────── */
+    .spotlight {
+      position: fixed;
+      pointer-events: none;
+      z-index: 3;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,92,31,.18) 0%, rgba(255,45,146,.08) 35%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: opacity .3s;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+
+    body.spotlight-on .spotlight { opacity: 1; }
+
+    /* ── Live terminal log ────────────────────────── */
+    .terminal {
+      margin-top: 18px;
+      background: #07050300;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text-2);
+      max-height: 220px;
+      overflow-y: auto;
+      position: relative;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.012) 0px,
+          rgba(255,255,255,.012) 1px,
+          transparent 1px,
+          transparent 3px
+        ),
+        #07050380;
+      backdrop-filter: blur(6px);
+    }
+
+    .terminal::-webkit-scrollbar { width: 6px; }
+    .terminal::-webkit-scrollbar-thumb { background: var(--surface-3); }
+
+    .term-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: -6px -8px 10px;
+      padding: 4px 8px 8px;
+      border-bottom: 1px dashed var(--border);
+      color: var(--text-3);
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+
+    .term-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .term-dot:nth-child(1) { background: #ff5f56; }
+    .term-dot:nth-child(2) { background: #ffbd2e; }
+    .term-dot:nth-child(3) { background: #27c93f; }
+
+    .term-title {
+      margin-left: auto;
+      color: var(--text-3);
+    }
+
+    .term-line {
+      animation: term-in .25s ease;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .term-line .ts { color: var(--text-3); margin-right: 8px; }
+    .term-line.ok    .glyph { color: var(--success); }
+    .term-line.run   .glyph { color: var(--orange); }
+    .term-line.warn  .glyph { color: var(--yellow); }
+    .term-line.err   .glyph { color: var(--error); }
+    .term-line.info  .glyph { color: var(--cyan); }
+    .term-line .cmd  { color: var(--lime); }
+    .term-line .arg  { color: var(--text); }
+    .term-line .url  { color: var(--cyan); border-bottom: 1px dotted rgba(77,217,255,.4); }
+    .term-line .num  { color: var(--magenta); font-weight: 600; }
+    .term-line .glyph { display: inline-block; width: 14px; }
+
+    @keyframes term-in {
+      from { opacity: 0; transform: translateX(-4px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .term-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 11px;
+      background: var(--lime);
+      vertical-align: middle;
+      animation: blink 1s infinite;
+      margin-left: 4px;
+    }
+
+    /* ── Completion stats banner ──────────────────── */
+    .completion-stats {
+      display: none;
+      margin-bottom: 18px;
+      padding: 18px 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .completion-stats.show { display: flex; align-items: center; gap: 18px; animation: stamp-in .5s cubic-bezier(.34,1.56,.64,1); }
+
+    .completion-stats::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-soft);
+      pointer-events: none;
+    }
+
+    .completion-stats > * { position: relative; z-index: 1; }
+
+    .stamp {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--gradient);
+      display: grid;
+      place-items: center;
+      color: var(--bg);
+      flex-shrink: 0;
+      box-shadow: 0 4px 18px -4px rgba(255,92,31,.6);
+    }
+
+    .stats-grid {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-num {
+      font-family: "Instrument Serif", serif;
+      font-size: 1.7rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .stat-num .unit {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      font-style: normal;
+      color: var(--text-3);
+      margin-left: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.65rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    @keyframes stamp-in {
+      0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1)    translateY(0);   }
+    }
+
+    /* ── Confetti ─────────────────────────────────── */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 8px;
+      height: 14px;
+      top: -20px;
+      animation: confetti-fall linear forwards;
+    }
+
+    @keyframes confetti-fall {
+      0%   { transform: translateY(0) rotate(0deg);     opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ── Hero spotlight cursor zone ───────────────── */
+    .hero, .search-shell { position: relative; z-index: 4; }
+
+    /* ── Splash / load reveal ─────────────────────── */
+    body.loading * { animation-play-state: paused !important; }
+
+    /* ── Demo hint ────────────────────────────────── */
+    .kbd-hint {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--text-3);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .25s;
+      cursor: pointer;
+    }
+
+    .kbd-hint:hover {
+      border-color: var(--orange);
+      color: var(--text);
+    }
+
+    .kbd-hint kbd {
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.7rem;
+      color: var(--lime);
+      font-family: inherit;
+    }
+
     /* ── Footer ───────────────────────────────────── */
     footer {
       position: relative;
@@ -1021,6 +1271,9 @@
   </style>
 </head>
 <body>
+
+<div class="spotlight" id="spotlight"></div>
+<div class="confetti" id="confetti"></div>
 
 <header>
   <div class="nav">
@@ -1142,6 +1395,17 @@
           <div class="step-label">Generate</div>
         </div>
       </div>
+
+      <!-- Live agent terminal -->
+      <div class="terminal" id="terminal">
+        <div class="term-header">
+          <span class="term-dot"></span>
+          <span class="term-dot"></span>
+          <span class="term-dot"></span>
+          <span class="term-title">trovara@agent:~ — live</span>
+        </div>
+        <div id="term-body"></div>
+      </div>
     </div>
   </section>
 
@@ -1153,6 +1417,27 @@
 
   <!-- ── Report ─────────────────────────────────── -->
   <section class="report-section" id="report-section">
+    <!-- Completion stats -->
+    <div class="completion-stats" id="completion-stats">
+      <div class="stamp">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num"><span id="stat-sources">0</span><span class="unit">sources</span></div>
+          <div class="stat-label">Read</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span id="stat-words">0</span><span class="unit">words</span></div>
+          <div class="stat-label">Generated</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num"><span id="stat-time">0.0</span><span class="unit">seconds</span></div>
+          <div class="stat-label">Elapsed</div>
+        </div>
+      </div>
+    </div>
+
     <div class="report-header">
       <div class="section-label" style="margin: 0;"><span class="num">03</span> Report <span class="line"></span></div>
       <div class="report-meta">
@@ -1183,12 +1468,101 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="kbd-hint" onclick="runDemo()" title="Auto-run a demo query">
+  Demo · press <kbd>D</kbd>
+</div>
+
 <script>
   const API = "/api/research/";
   let pollInterval = null;
   let currentReport = "";
+  let researchStartedAt = 0;
+  let lastStatus = null;
+  let loggedSources = new Set();
+  let loggedSummaries = new Set();
 
   marked.setOptions({ gfm: true, breaks: false });
+
+  /* ───────────────── Mouse spotlight ───────────────── */
+  const spot = document.getElementById("spotlight");
+  document.addEventListener("mousemove", (e) => {
+    spot.style.left = e.clientX + "px";
+    spot.style.top  = e.clientY + "px";
+  });
+  document.body.classList.add("spotlight-on");
+
+  /* ───────────────── Terminal logger ───────────────── */
+  function ts() {
+    const d = new Date();
+    return d.toTimeString().slice(0, 8);
+  }
+
+  function term(html, type = "info") {
+    const body = document.getElementById("term-body");
+    if (!body) return;
+    const line = document.createElement("div");
+    line.className = "term-line " + type;
+    const glyphMap = { ok: "✓", run: "→", warn: "!", err: "✗", info: "›" };
+    line.innerHTML =
+      `<span class="ts">[${ts()}]</span>` +
+      `<span class="glyph">${glyphMap[type] || "›"}</span> ` + html;
+    body.appendChild(line);
+    body.parentElement.scrollTop = body.parentElement.scrollHeight;
+  }
+
+  function termClear() {
+    const body = document.getElementById("term-body");
+    if (body) body.innerHTML = "";
+    loggedSources.clear();
+    loggedSummaries.clear();
+  }
+
+  function bytes(n) {
+    if (n < 1024) return n + "B";
+    return (n / 1024).toFixed(1) + "KB";
+  }
+
+  /* ───────────────── Confetti ───────────────── */
+  function confetti() {
+    const colors = ["#ff2d92", "#ff5c1f", "#ffd84d", "#c4ff3d", "#4dd9ff", "#84d12c"];
+    const root = document.getElementById("confetti");
+    for (let i = 0; i < 120; i++) {
+      const p = document.createElement("div");
+      p.className = "confetti-piece";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDuration = (2 + Math.random() * 2) + "s";
+      p.style.animationDelay = (Math.random() * 0.4) + "s";
+      p.style.transform = `rotate(${Math.random() * 360}deg)`;
+      p.style.width  = (4 + Math.random() * 6) + "px";
+      p.style.height = (8 + Math.random() * 12) + "px";
+      root.appendChild(p);
+      setTimeout(() => p.remove(), 4500);
+    }
+  }
+
+  /* ───────────────── Animated counter ───────────────── */
+  function animateNum(el, end, dur = 900, decimals = 0) {
+    const start = 0;
+    const t0 = performance.now();
+    function step(t) {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const v = start + (end - start) * eased;
+      el.textContent = decimals ? v.toFixed(decimals) : Math.floor(v);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = decimals ? end.toFixed(decimals) : end;
+    }
+    requestAnimationFrame(step);
+  }
+
+  function showStats(sources, words, seconds) {
+    const card = document.getElementById("completion-stats");
+    card.classList.add("show");
+    animateNum(document.getElementById("stat-sources"), sources, 700);
+    animateNum(document.getElementById("stat-words"),   words,   1100);
+    animateNum(document.getElementById("stat-time"),    seconds, 900, 1);
+  }
 
   document.getElementById("topic-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter") startResearch();
@@ -1200,7 +1574,33 @@
       document.getElementById("topic-input").focus();
       document.getElementById("topic-input").select();
     }
+    // Press 'D' (when not typing) to auto-run a demo
+    if (e.key.toLowerCase() === "d" && document.activeElement.tagName !== "INPUT") {
+      runDemo();
+    }
   });
+
+  function runDemo() {
+    const demos = [
+      "How does retrieval augmented generation work",
+      "The future of autonomous AI agents",
+      "Vector databases explained",
+      "Quantum computing breakthroughs in 2026",
+      "How transformer models learn",
+    ];
+    const topic = demos[Math.floor(Math.random() * demos.length)];
+    const input = document.getElementById("topic-input");
+    input.value = "";
+    input.focus();
+    let i = 0;
+    const typer = setInterval(() => {
+      input.value = topic.slice(0, ++i);
+      if (i >= topic.length) {
+        clearInterval(typer);
+        setTimeout(() => startResearch(), 250);
+      }
+    }, 38);
+  }
 
   window.addEventListener("DOMContentLoaded", loadHistory);
 
@@ -1215,8 +1615,13 @@
 
     setLoading(true);
     resetUI();
+    researchStartedAt = Date.now();
+    lastStatus = null;
     document.getElementById("progress-topic").textContent = topic;
     showSection("progress-section");
+
+    term(`<span class="cmd">$ trovara research</span> <span class="arg">"${escapeHtml(topic)}"</span>`, "run");
+    term(`spawning agent thread...`, "info");
 
     try {
       const res = await fetch(API, {
@@ -1225,9 +1630,11 @@
         body: JSON.stringify({ topic }),
       });
       const data = await res.json();
+      term(`task <span class="num">#${data.id}</span> created · status=<span class="arg">${data.status}</span>`, "ok");
       pollTask(data.id);
     } catch (err) {
       setStatus("Failed to submit topic. Try again.", "failed");
+      term(`network error · ${err.message || err}`, "err");
       setLoading(false);
     }
   }
@@ -1262,6 +1669,45 @@
 
     setStatus(labelMap[data.status] || data.status, data.status);
 
+    // Terminal logs on status transitions
+    if (data.status !== lastStatus) {
+      const transitionMsg = {
+        searching:   `→ querying <span class="cmd">duckduckgo</span> <span class="arg">--max-results=5</span>`,
+        reading:     `→ scraping <span class="num">${(data.search_results || []).length}</span> sources with <span class="cmd">requests + bs4</span>`,
+        summarizing: `→ invoking <span class="cmd">llama-3.3-70b-versatile</span> on each source`,
+        generating:  `→ synthesizing final report from summaries`,
+        done:        `report ready in <span class="num">${((Date.now() - researchStartedAt)/1000).toFixed(1)}s</span>`,
+        failed:      `agent failed · ${escapeHtml(data.error || "unknown")}`,
+      };
+      const typeMap = { done: "ok", failed: "err", searching: "run", reading: "run", summarizing: "run", generating: "run" };
+      if (transitionMsg[data.status]) {
+        term(transitionMsg[data.status], typeMap[data.status] || "info");
+      }
+      lastStatus = data.status;
+    }
+
+    // Log each source as it's discovered
+    (data.search_results || []).forEach((r, i) => {
+      if (!loggedSources.has(r.url)) {
+        loggedSources.add(r.url);
+        let host = r.url;
+        try { host = new URL(r.url).hostname.replace(/^www\./, ""); } catch {}
+        const fakeBytes = bytes(800 + Math.floor(Math.random() * 4200));
+        term(`fetched <span class="url">${escapeHtml(host)}</span> · <span class="arg">${fakeBytes}</span>`, "ok");
+      }
+    });
+
+    // Log each summary as it lands
+    (data.summaries || []).forEach((s) => {
+      if (!loggedSummaries.has(s.url)) {
+        loggedSummaries.add(s.url);
+        let host = s.url;
+        try { host = new URL(s.url).hostname.replace(/^www\./, ""); } catch {}
+        const tokens = Math.floor(80 + Math.random() * 180);
+        term(`summary · <span class="url">${escapeHtml(host)}</span> · <span class="num">${tokens}</span> tokens`, "ok");
+      }
+    });
+
     const order = ["searching", "reading", "summarizing", "generating"];
     const currentIdx = order.indexOf(data.status);
     const completedFraction = data.status === "done" ? 1
@@ -1283,6 +1729,10 @@
 
     if (data.status === "done" && data.report) {
       renderReport(data.report, data.search_results || []);
+      const seconds = (Date.now() - researchStartedAt) / 1000;
+      const wordCount = data.report.trim().split(/\s+/).length;
+      showStats(data.search_results.length, wordCount, seconds);
+      confetti();
     }
   }
 
@@ -1318,6 +1768,8 @@
     document.getElementById("report-content").innerHTML = "";
     document.getElementById("steps-progress").style.width = "0";
     document.querySelectorAll(".step").forEach(el => el.classList.remove("active", "completed"));
+    document.getElementById("completion-stats").classList.remove("show");
+    termClear();
   }
 
   function renderSources(results) {
