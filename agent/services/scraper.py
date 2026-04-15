@@ -22,6 +22,8 @@ def fetch_page_text(url: str) -> str:
 
         text = soup.get_text(separator=" ", strip=True)
         text = " ".join(text.split())
+        # Strip null bytes and other control chars — Postgres JSONB rejects \u0000
+        text = text.replace("\x00", "")
 
         return text[:MAX_CHARS]
 
